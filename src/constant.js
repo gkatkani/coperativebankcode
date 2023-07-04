@@ -2,6 +2,15 @@ export const KHARIF_MIN_LIMIT = 4;
 export const KHARIF_MAX_LIMIT = 9;
 export const RABI = "rabi";
 export const KHARIF = "kharif";
+export const END_DATE = "2023-03-31";
+export const INITIALIZE = {
+  loanAmount: "",
+  loanSanctionDate: null,
+  loanType: "",
+  serialNumber: "",
+  accountNumber: "",
+  personName: "",
+};
 
 export const INTEREST_ARRAY = [
   {
@@ -84,7 +93,7 @@ export const INTEREST_ARRAY = [
     penaltyInterestRate: 3,
     exceptions: [
       { startDate: "2009-04-01", endDate: "2009-06-30", rate: 13 },
-      { startDate: "2009-07-01", endDate: null, rate: 11.5 },
+      { startDate: "2009-07-01", endDate: "2010-03-31", rate: 11.5 },
     ],
   },
   {
@@ -157,7 +166,7 @@ export const INTEREST_ARRAY = [
     penaltyInterestRate: 3,
     exceptions: [
       { startDate: null, endDate: "2017-02-28", rate: 11.5 },
-      { startDate: "2017-03-01", endDate: null, rate: 11 },
+      { startDate: "2017-03-01", endDate: "2018-03-31", rate: 11 },
     ],
   },
   {
@@ -210,7 +219,7 @@ export const INTEREST_ARRAY = [
     penaltyInterestRate: 3,
     exceptions: [
       { startDate: null, endDate: "2021-06-30", rate: 11 },
-      { startDate: "2021-07-01", endDate: null, rate: 10 },
+      { startDate: "2021-07-01", endDate: "2022-03-31", rate: 10 },
     ],
   },
   {

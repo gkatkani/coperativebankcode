@@ -11,6 +11,13 @@ export const checkForLoanType = (momentObj) => {
   const month = moment(momentObj).month() + 1;
   return KHARIF_MIN_LIMIT <= month && month <= KHARIF_MAX_LIMIT ? KHARIF : RABI;
 };
+export const validateNumbers = (s) => {
+  var rgx = /^[0-9]*\.?[0-9]*$/;
+  return s.match(rgx);
+};
+export const addition = (a, b) => {
+  return parseFloat(a) + parseFloat(b);
+};
 export const getCurrentFinancialDates = (date) => {
   let financialStartDate = null;
   let financialEndDate = null;
@@ -42,6 +49,7 @@ export const getPrevioustDate = (date) => {
 };
 
 export const getExceptionArray = (startDate, endDate, data) => {
+  let tempArray = [];
   if (data.exceptions.length > 0) {
     data.exceptions.forEach((elem, index) => {
       if (elem.startDate === null) {
@@ -54,29 +62,24 @@ export const getExceptionArray = (startDate, endDate, data) => {
           elem.startDate = startDate;
         }
       }
-      if (elem.endDate === null) {
+      const localEndObj = new Date(elem.endDate);
+      localEndObj.setHours(0, 0, 0, 0);
+      elem.endDate = localEndObj;
+      if (endDate.getTime() < localEndObj.getTime()) {
         elem.endDate = endDate;
-      } else {
-        const localEndObj = new Date(elem.endDate);
-        localEndObj.setHours(0, 0, 0, 0);
-        elem.endDate = localEndObj;
-        if (endDate.getTime() < localEndObj.getTime()) {
-          elem.endDate = endDate;
-        }
+      }
+      if (startDate.getTime() < elem.endDate.getTime()) {
+        tempArray.push({ ...elem });
       }
     });
-    return data.exceptions;
+    return tempArray;
   }
   return [];
 };
 
 export const calculateInterest = (obj) => {
   const tempArray = [];
-  // const year = moment(obj.startDate).year();
-  // const month = moment(obj.startDate).month();
-  // const date = moment(obj.startDate).date();
-
-  const loanSanctionDate = new Date(moment(obj.startDate));
+  const loanSanctionDate = new Date(moment(obj.loanSanctionDate));
   loanSanctionDate.setHours(0, 0, 0, 0);
   const dateKey = obj.loanType === KHARIF ? "kharifDate" : "RabiDate";
   const interestArrayForApply = INTEREST_ARRAY.filter(
@@ -99,10 +102,18 @@ export const calculateInterest = (obj) => {
       const currentDate = getNextDate(
         moment(tempArray[tempArray.length - 1]["endDate"]).format("YYYY-MM-DD")
       );
+      let tempYear = currentDate.getFullYear();
+      if (currentDate.getMonth() + 1 < 4) {
+        tempYear = currentDate.getFullYear() - 1;
+      }
+
+      const refreshInterestArrayForApply = interestArrayForApply.find(
+        (x) => x.year === tempYear
+      );
       const exceptionArray = getExceptionArray(
         currentDate,
         financialEndDate,
-        interestArrayForApply[0]
+        refreshInterestArrayForApply
       );
 
       if (exceptionArray.length > 0) {
@@ -110,10 +121,10 @@ export const calculateInterest = (obj) => {
           tempArray.push({
             startDate: item.startDate,
             endDate: item.endDate,
-            dayDiff: getDaysBetweenTwoDateObj(currentDate, financialEndDate),
+            dayDiff: getDaysBetweenTwoDateObj(item.startDate, item.endDate),
             interestRate: item.rate,
-            penaltyRate: interestArrayForApply[0]["penaltyInterestRate"],
-            label: interestArrayForApply[0]["label"],
+            penaltyRate: refreshInterestArrayForApply.penaltyInterestRate,
+            label: refreshInterestArrayForApply.label,
           });
         });
       } else {
@@ -121,9 +132,9 @@ export const calculateInterest = (obj) => {
           startDate: currentDate,
           endDate: financialEndDate,
           dayDiff: getDaysBetweenTwoDateObj(currentDate, financialEndDate),
-          interestRate: interestArrayForApply[0]["interestRateTillDueDate"],
-          penaltyRate: interestArrayForApply[0]["penaltyInterestRate"],
-          label: interestArrayForApply[0]["label"],
+          interestRate: refreshInterestArrayForApply.defaulterInterestRate,
+          penaltyRate: refreshInterestArrayForApply.penaltyInterestRate,
+          label: refreshInterestArrayForApply.label,
         });
       }
     }

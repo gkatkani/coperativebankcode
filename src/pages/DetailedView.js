@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState, useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
@@ -9,6 +9,7 @@ import Paper from "@mui/material/Paper";
 import moment from "moment";
 import { styled } from "@mui/material/styles";
 import { TableFooter, Typography } from "@mui/material";
+
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: theme.palette.common.black,
@@ -27,9 +28,15 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     border: 0,
   },
 }));
-const DetailedView = ({ reportList, totalSum }) => {
+const DetailedView = ({ reportList, totalInterest, amount }) => {
+  const [totalAmount, setTotalAmount] = useState(0);
+  useEffect(() => {
+    setTotalAmount(parseFloat(amount) + totalInterest);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalInterest]);
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
+      <br></br>
       <TableContainer sx={{ maxHeight: 400 }}>
         <Table
           sx={{ minWidth: 550 }}
@@ -77,21 +84,47 @@ const DetailedView = ({ reportList, totalSum }) => {
                   {row?.penaltyRate ?? 0}%
                 </StyledTableCell>
                 <StyledTableCell align="left">
-                  {row?.rowTotal.toFixed(2) ?? 0}
+                  {row?.rowTotal.toFixed(5) ?? 0}
                 </StyledTableCell>
               </StyledTableRow>
             ))}
           </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TableCell colSpan={5}></TableCell>
-              <TableCell colSpan={3} align="right">
-                <Typography variant={"h6"}>
-                  Total : {totalSum.toFixed(2)}
-                </Typography>
-              </TableCell>
-            </TableRow>
-          </TableFooter>
+          {reportList.length > 0 && (
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={5}></TableCell>
+                <TableCell colSpan={3} align="right">
+                  <Typography variant={"h6"}>
+                    Total Interest : {totalInterest.toFixed(5)}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell colSpan={5}></TableCell>
+                <TableCell colSpan={3} align="right">
+                  <Typography variant={"h6"}>
+                    Total Amount : {totalAmount.toFixed(5)}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          )}
+          {reportList.length === 0 && (
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={5}></TableCell>
+                <TableCell colSpan={3} align="right">
+                  <Typography variant={"h6"}>Total Interest : 0</Typography>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell colSpan={5}></TableCell>
+                <TableCell colSpan={3} align="right">
+                  <Typography variant={"h6"}>Total Amount : 0</Typography>
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          )}
         </Table>
       </TableContainer>
     </Paper>
