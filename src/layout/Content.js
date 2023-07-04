@@ -2,9 +2,7 @@ import { Box, Button, Grid, TextField } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { KHARIF } from "../constant";
 import { useState } from "react";
-import moment from "moment";
 import { calculateInterest, checkForLoanType } from "../helper/Index";
 import DetailedView from "../pages/DetailedView";
 

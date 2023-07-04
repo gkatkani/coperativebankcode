@@ -30,9 +30,9 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 const DetailedView = ({ reportList, totalSum }) => {
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
-      <TableContainer sx={{ maxHeight: 440 }}>
+      <TableContainer sx={{ maxHeight: 400 }}>
         <Table
-          sx={{ minWidth: 650 }}
+          sx={{ minWidth: 550 }}
           size="small"
           aria-label="simple table"
           stickyHeader={true}

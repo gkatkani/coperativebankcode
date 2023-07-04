@@ -6,6 +6,7 @@
   "version": "0.1.0",
   "private": true,
   "main": "public/electron.js",
+  
   "homepage": "./",
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -52,25 +53,27 @@
     "electron": "^25.2.0",
     "electron-builder": "^24.4.0"
   },
-  "build": {
+  "build": {    
+    "appId": "testing",
     
+    "icon": "public/settings.png",
     "win": {
-        "publish": {
-            "provider": "github",
-            "owner": "gkatkani",
-            "repo": "https://github.com/gkatkani/cooperativebrankbuild.git",
-            "private": true,
-            "token": "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"
-        }
+      "publish": {
+          "provider": "github",
+          "owner": "gkatkani",
+          "repo": "https://github.com/gkatkani/cooperativebrankbuild.git",
+          "private": true,
+          "token": "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"
+      }
     },
     "files": [
-        "build/**/*",
-        "node_modules/**/*"
+      "build/**/*",
+      "node_modules/**/*"
     ],
     "publish": {
-        "provider": "github",
-        "private": true,
-        "owner": "Github Owner"
+      "provider": "github",
+      "private": true,
+      "owner": "Github Owner"
     }
 }
 }

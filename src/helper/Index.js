@@ -72,9 +72,9 @@ export const getExceptionArray = (startDate, endDate, data) => {
 
 export const calculateInterest = (obj) => {
   const tempArray = [];
-  const year = moment(obj.startDate).year();
-  const month = moment(obj.startDate).month();
-  const date = moment(obj.startDate).date();
+  // const year = moment(obj.startDate).year();
+  // const month = moment(obj.startDate).month();
+  // const date = moment(obj.startDate).date();
 
   const loanSanctionDate = new Date(moment(obj.startDate));
   loanSanctionDate.setHours(0, 0, 0, 0);
