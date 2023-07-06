@@ -81,22 +81,28 @@ export const calculateInterest = (obj) => {
   const tempArray = [];
   const loanSanctionDate = new Date(moment(obj.loanSanctionDate));
   loanSanctionDate.setHours(0, 0, 0, 0);
+  const month = new Date(moment(obj.loanSanctionDate)).getMonth() + 1;
+  let year = new Date(moment(obj.loanSanctionDate)).getFullYear();
+  if (month < 4) {
+    year = year - 1;
+  }
+
   const dateKey = obj.loanType === KHARIF ? "kharifDate" : "RabiDate";
-  const interestArrayForApply = INTEREST_ARRAY.filter(
-    (item) => new Date(item[dateKey]).getTime() > loanSanctionDate.getTime()
+  const interestArrayForApply = INTEREST_ARRAY.find(
+    (item) => item.year === year
   );
 
-  if (interestArrayForApply.length > 0) {
-    const limitDate = new Date(interestArrayForApply[0][dateKey]);
+  if (interestArrayForApply !== undefined) {
+    const limitDate = new Date(interestArrayForApply[dateKey]);
     limitDate.setHours(0, 0, 0, 0);
     const { financialEndDate } = getCurrentFinancialDates(limitDate);
     tempArray.push({
       startDate: loanSanctionDate,
       endDate: limitDate,
       dayDiff: getDaysBetweenTwoDateObj(loanSanctionDate, limitDate),
-      interestRate: interestArrayForApply[0]["interestRateTillDueDate"],
+      interestRate: interestArrayForApply.interestRateTillDueDate,
       penaltyRate: 0,
-      label: interestArrayForApply[0]["label"],
+      label: interestArrayForApply.label,
     });
     if (limitDate.getTime() <= financialEndDate.getTime()) {
       const currentDate = getNextDate(
@@ -107,7 +113,7 @@ export const calculateInterest = (obj) => {
         tempYear = currentDate.getFullYear() - 1;
       }
 
-      const refreshInterestArrayForApply = interestArrayForApply.find(
+      const refreshInterestArrayForApply = INTEREST_ARRAY.find(
         (x) => x.year === tempYear
       );
       const exceptionArray = getExceptionArray(
@@ -162,7 +168,7 @@ export const calculateInterest = (obj) => {
         internalStartDate = internalLimitDate;
         internalEndDate = internalFinancialEndDate;
       }
-      const interestArrayObj = interestArrayForApply.find(
+      const interestArrayObj = INTEREST_ARRAY.find(
         (x) => x.year === internalStartDate.getFullYear()
       );
       const exceptionArray = getExceptionArray(
