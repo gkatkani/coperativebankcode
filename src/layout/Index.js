@@ -5,14 +5,11 @@ import Header from "./Header";
 const DefaultLayout = () => {
   return (
     <>
-      <div className="header">
+      <div>
         <Header />
       </div>
-      <div className="container">
-        <main className="main">
-          <Content />
-        </main>
-      </div>
+      <br />
+      <Content />
       <div className="footer">
         <Footer />
       </div>

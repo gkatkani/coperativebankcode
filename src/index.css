@@ -18,16 +18,18 @@ code {
   min-height: 100vh;
   
 }
-.header,
+
 .footer {  
   background-color: #1976d2;
-  height: 50px;
+}
+.mr_bm_20 {
+  margin-bottom: 20px;
 }
 
-.container {
+/* .container {
   display: flex;
   padding-top: 50px;
   flex: 1;
-}
+} */
 
 

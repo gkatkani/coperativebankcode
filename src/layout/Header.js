@@ -1,14 +1,16 @@
-import { AppBar, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Toolbar, Typography } from "@mui/material";
 
 const Header = () => {
   return (
-    <header>
-      <AppBar>
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="static">
         <Toolbar>
-          <Typography>Co-operative bank [V 1.0.0 (Alpha)]</Typography>
+          <Typography variant="h6" color="inherit" component="div">
+            Co-operative bank [V 1.0.0 (Alpha)]
+          </Typography>
         </Toolbar>
       </AppBar>
-    </header>
+    </Box>
   );
 };
 export default Header;

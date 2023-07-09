@@ -11,7 +11,26 @@ export const INITIALIZE = {
   accountNumber: "",
   personName: "",
 };
-
+export const BASIC_TRANSACTION_ROW = {
+  loanAmount: "",
+  loanAmountLabel: "Loan Amount",
+  LoanDateLabel: "Date",
+  interestAmount: "",
+  interestAmountLabel: "Deposit in interest",
+  loanDate: null,
+  loanSanctionDate: null,
+  isDeposit: false,
+  loanType: "",
+};
+export const PERSONAL_INFORMATION = {
+  serialNumber: "",
+  accountNumber: "",
+  personName: "",
+};
+export const TRANSACTION = [{ ...BASIC_TRANSACTION_ROW }];
+export const MINIMUM_DATE = "2002-04-01";
+export const MAXIMUM_DATE = "2023-03-31";
+export const DAYS_IN_YEAR = 365;
 export const INTEREST_ARRAY = [
   {
     year: 2002,

@@ -1,5 +1,6 @@
 import moment from "moment";
 import {
+  DAYS_IN_YEAR,
   INTEREST_ARRAY,
   KHARIF,
   KHARIF_MAX_LIMIT,
@@ -18,6 +19,9 @@ export const validateNumbers = (s) => {
 export const addition = (a, b) => {
   return parseFloat(a) + parseFloat(b);
 };
+export const isAmountEmpty = (amount) =>
+  amount === "" || amount === 0 || amount === null;
+export const getSimpleInterest = (p, r, t) => p * r * (t / DAYS_IN_YEAR) * 0.01;
 export const getCurrentFinancialDates = (date) => {
   let financialStartDate = null;
   let financialEndDate = null;
@@ -97,12 +101,15 @@ export const calculateInterest = (obj) => {
     limitDate.setHours(0, 0, 0, 0);
     const { financialEndDate } = getCurrentFinancialDates(limitDate);
     tempArray.push({
+      loanPrincipalAmount: obj.amount,
       startDate: loanSanctionDate,
       endDate: limitDate,
       dayDiff: getDaysBetweenTwoDateObj(loanSanctionDate, limitDate),
       interestRate: interestArrayForApply.interestRateTillDueDate,
       penaltyRate: 0,
       label: interestArrayForApply.label,
+      isDeposit: false,
+      rowTotal: 0,
     });
     if (limitDate.getTime() <= financialEndDate.getTime()) {
       const currentDate = getNextDate(
@@ -125,22 +132,28 @@ export const calculateInterest = (obj) => {
       if (exceptionArray.length > 0) {
         exceptionArray.forEach((item) => {
           tempArray.push({
+            loanPrincipalAmount: obj.amount,
             startDate: item.startDate,
             endDate: item.endDate,
             dayDiff: getDaysBetweenTwoDateObj(item.startDate, item.endDate),
             interestRate: item.rate,
             penaltyRate: refreshInterestArrayForApply.penaltyInterestRate,
             label: refreshInterestArrayForApply.label,
+            isDeposit: false,
+            rowTotal: 0,
           });
         });
       } else {
         tempArray.push({
+          loanPrincipalAmount: obj.amount,
           startDate: currentDate,
           endDate: financialEndDate,
           dayDiff: getDaysBetweenTwoDateObj(currentDate, financialEndDate),
           interestRate: refreshInterestArrayForApply.defaulterInterestRate,
           penaltyRate: refreshInterestArrayForApply.penaltyInterestRate,
           label: refreshInterestArrayForApply.label,
+          isDeposit: false,
+          rowTotal: 0,
         });
       }
     }
@@ -180,22 +193,28 @@ export const calculateInterest = (obj) => {
       if (exceptionArray.length > 0) {
         exceptionArray.forEach((item) => {
           tempArray.push({
+            loanPrincipalAmount: obj.amount,
             startDate: item.startDate,
             endDate: item.endDate,
             dayDiff: getDaysBetweenTwoDateObj(item.startDate, item.endDate),
             interestRate: item.rate,
             penaltyRate: interestArrayObj.penaltyInterestRate,
             label: interestArrayObj.label,
+            isDeposit: false,
+            rowTotal: 0,
           });
         });
       } else {
         tempArray.push({
+          loanPrincipalAmount: obj.amount,
           startDate: internalStartDate,
           endDate: internalEndDate,
           dayDiff: getDaysBetweenTwoDateObj(internalStartDate, internalEndDate),
           interestRate: interestArrayObj.defaulterInterestRate,
           penaltyRate: interestArrayObj.penaltyInterestRate,
           label: interestArrayObj.label,
+          isDeposit: false,
+          rowTotal: 0,
         });
       }
     }
@@ -209,4 +228,112 @@ export const calculateInterest = (obj) => {
 export const getDaysBetweenTwoDateObj = (fromDate, toDate) => {
   const result = Math.floor((toDate.getTime() - fromDate.getTime()) / 86400000);
   return result + 1;
+};
+/*
+first param contain all list of interest fro individual loan with start and end date
+second param conatin individual row of load from form submit
+sorted list of deposit by date
+*/
+export const manageRecovery = (
+  dayWiseInterestList = [],
+  loanObj,
+  depositList = []
+) => {
+  let tempList = [];
+  let localDepositRows = [...depositList];
+  let localDayWiseInterestList = [];
+  // day wise list for individual loan enteries
+  dayWiseInterestList.forEach((item) => {
+    const itemCopy = { ...item };
+    const filterDepositRows = localDepositRows.filter(
+      (x) =>
+        x.loanDate.getTime() >= item.startDate.getTime() &&
+        x.loanDate.getTime() <= item.endDate.getTime()
+    );
+
+    if (filterDepositRows.length > 0) {
+      let tempList = [];
+
+      filterDepositRows.forEach((subItem, subIndex) => {
+        if (subItem.loanDate.getTime() <= item.endDate.getTime()) {
+          const localEndDateObj = getPrevioustDate(
+            moment(subItem.loanDate).format("YYYY-MM-DD")
+          );
+          const lastLocalDate =
+            tempList.length > 0
+              ? tempList[tempList.length - 1].endDate
+              : item.startDate;
+          const localStartDateObj = getNextDate(
+            moment(lastLocalDate).format("YYYY-MM-DD")
+          );
+
+          tempList.push({
+            ...itemCopy,
+            startDate: localStartDateObj,
+            endDate: localEndDateObj,
+            dayDiff: getDaysBetweenTwoDateObj(
+              localStartDateObj,
+              localEndDateObj
+            ),
+            isDeposit: subIndex === 0 ? false : true,
+          });
+          if (subIndex === filterDepositRows.length - 1) {
+            const lastLocalDate = tempList[tempList.length - 1].endDate;
+            const localStartDateObj = getNextDate(
+              moment(lastLocalDate).format("YYYY-MM-DD")
+            );
+            if (lastLocalDate.getTime() < itemCopy.endDate.getTime()) {
+              tempList.push({
+                ...itemCopy,
+                startDate: localStartDateObj,
+                endDate: itemCopy.endDate,
+                dayDiff: getDaysBetweenTwoDateObj(
+                  localStartDateObj,
+                  itemCopy.endDate
+                ),
+                isDeposit: true,
+              });
+            }
+          }
+        }
+      });
+
+      localDayWiseInterestList.push(...tempList);
+    } else {
+      localDayWiseInterestList.push(item);
+    }
+  });
+  let interestSum = 0;
+  let finalInterestList = [];
+  localDayWiseInterestList.forEach((item) => {
+    if (item.isDeposit) {
+      let p = item.loanPrincipalAmount;
+      let r = parseFloat(item.interestRate) + parseFloat(item.penaltyRate);
+      let t = parseFloat(item.dayDiff) / DAYS_IN_YEAR;
+      item.rowTotal = getSimpleInterest(p, r, t);
+      interestSum += item.rowTotal;
+      item.sumOfInterest = interestSum;
+    } else {
+      let p = loanObj?.loanAmount;
+      let r = parseFloat(item.interestRate) + parseFloat(item.penaltyRate);
+      let t = parseFloat(item.dayDiff) / DAYS_IN_YEAR;
+      item.rowTotal = getSimpleInterest(p, r, t);
+      interestSum += item.rowTotal;
+      item.sumOfInterest = interestSum;
+      finalInterestList.push(item);
+    }
+  });
+  console.log("localDayWiseInterestList ====> ", localDayWiseInterestList);
+  // dayWiseInterestList.forEach((item) => {
+
+  //   let p = parseFloat(loanObj?.loanAmount);
+  //   let r = parseFloat(item.interestRate) + parseFloat(item.penaltyRate);
+  //   let t = parseFloat(item.dayDiff) / DAYS_IN_YEAR;
+  //   item.rowTotal = getSimpleInterest(p, r, t);
+  //   interestSum += item.rowTotal;
+  //   item.sumOfInterest = interestSum;
+  //   tempList.push(item);
+  // });
+
+  return tempList;
 };
