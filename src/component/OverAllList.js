@@ -7,9 +7,9 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import moment from "moment";
 import { styled } from "@mui/material/styles";
-import { TableFooter, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
-import { addition } from "../helper/Index";
+import { Grid, TableFooter, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { addition, checkForLoanType } from "../helper/Index";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -29,24 +29,81 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     border: 0,
   },
 }));
-const OverAllList = ({ list }) => {
+const OverAllList = React.forwardRef((props, ref) => {
+  const list = props?.list;
+  const intialObj = props?.intialObj;
+  const remainingAmount = props?.remainingAmount;
+
   const [grandTotal, setGrandTotal] = useState(0);
   const [grandInterest, setGrandInterest] = useState(0);
   useEffect(() => {
     let rowInterestArray = [];
     let rowLoanAmounArray = [];
     list.forEach((element) => {
-      rowInterestArray.push(parseFloat(element.interestSum));
-      rowLoanAmounArray.push(parseFloat(element.loanAmount));
+      if (element.summaryReport.length > 0) {
+        const lastRow = element.summaryReport[element.summaryReport.length - 1];
+        rowInterestArray.push(parseFloat(lastRow.sumOfInterest));
+        rowLoanAmounArray.push(parseFloat(lastRow.loanPrincipalAmount));
+      }
     });
     const rowInterestArraySum = rowInterestArray.reduce((a, b) => a + b, 0);
     const rowLoanAmountArraySum = rowLoanAmounArray.reduce((a, b) => a + b, 0);
     setGrandInterest(rowInterestArraySum);
     setGrandTotal(addition(rowLoanAmountArraySum, rowInterestArraySum));
   }, [list]);
+  const getRowAmount = (rowObj) => {
+    let temp = "";
+
+    if (rowObj.isDeposit) {
+      if (rowObj.depositType === "interest") {
+        temp = rowObj?.interestAmount;
+      } else {
+        temp = rowObj?.loanAmount;
+      }
+    } else {
+      temp = rowObj.loanAmount;
+    }
+    return temp;
+  };
+  const getRowType = (rowObj) => {
+    let temp = "";
+
+    if (rowObj.isDeposit) {
+      if (rowObj.depositType === "interest") {
+        temp = "Deposit in Principal";
+      } else {
+        temp = "Deposit in Interest";
+      }
+    } else {
+      temp = checkForLoanType(moment(rowObj?.loanDate));
+    }
+    return temp;
+  };
+
   return (
-    <Paper sx={{ width: "100%", overflow: "hidden" }}>
+    <Paper
+      sx={{ width: "100%", overflow: "hidden", padding: "15px" }}
+      ref={ref}
+    >
       <br></br>
+      <Grid container spacing={1} alignItems={"left"}>
+        <Grid item xs={6}>
+          <Typography align={"left"} variant="subtitle1">
+            Serial Number :{intialObj.serialNumber}
+          </Typography>
+        </Grid>
+        <Grid item xs={6}>
+          <Typography align={"left"} variant="subtitle1">
+            Name :{intialObj.personName}
+          </Typography>
+        </Grid>
+        <Grid item xs={6}>
+          <Typography align={"left"} variant="subtitle1">
+            Account Number :{intialObj.accountNumber}
+          </Typography>
+        </Grid>
+      </Grid>
+
       <TableContainer sx={{ maxHeight: 400 }}>
         <Table
           sx={{ minWidth: 550 }}
@@ -57,11 +114,9 @@ const OverAllList = ({ list }) => {
           <TableHead>
             <StyledTableRow>
               <StyledTableCell align="left">S.no</StyledTableCell>
-              <StyledTableCell align="left">Loan Amount</StyledTableCell>
-              <StyledTableCell align="left">Loan Type</StyledTableCell>
-              <StyledTableCell align="left">Loan date</StyledTableCell>
-              <StyledTableCell align="left">Interest</StyledTableCell>
-              <StyledTableCell align="left">Total</StyledTableCell>
+              <StyledTableCell align="left">Amount</StyledTableCell>
+              <StyledTableCell align="left">Type</StyledTableCell>
+              <StyledTableCell align="left">Date</StyledTableCell>
             </StyledTableRow>
           </TableHead>
           <TableBody>
@@ -74,18 +129,11 @@ const OverAllList = ({ list }) => {
                   {index + 1}
                 </StyledTableCell>
                 <StyledTableCell scope="row">
-                  {row?.loanAmount ?? "-"}
+                  {getRowAmount(row)}
                 </StyledTableCell>
-                <StyledTableCell scope="row">{row?.loanType}</StyledTableCell>
+                <StyledTableCell scope="row">{getRowType(row)}</StyledTableCell>
                 <StyledTableCell scope="row">
-                  {moment(row?.loanSanctionDate).format("DD-MM-YYYY")}
-                </StyledTableCell>
-
-                <StyledTableCell align="left">
-                  {row?.interestSum}
-                </StyledTableCell>
-                <StyledTableCell align="left">
-                  {row?.interestWithPrincipal}
+                  {moment(row?.loanDate).format("DD-MM-YYYY")}
                 </StyledTableCell>
               </StyledTableRow>
             ))}
@@ -93,25 +141,36 @@ const OverAllList = ({ list }) => {
 
           <TableFooter>
             <TableRow>
-              <TableCell colSpan={5}></TableCell>
+              <TableCell colSpan={2}></TableCell>
               <TableCell colSpan={3} align="right">
                 <Typography variant={"h6"}>
-                  Grand Interest :{grandInterest}
+                  Grand Interest :{grandInterest.toFixed(3)}
                 </Typography>
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell colSpan={5}></TableCell>
+              <TableCell colSpan={2}></TableCell>
               <TableCell colSpan={3} align="right">
                 <Typography variant={"h6"}>
-                  Grand Amount :{grandTotal}
+                  Grand Amount :{grandTotal.toFixed(3)}
                 </Typography>
               </TableCell>
             </TableRow>
+            {remainingAmount > 0 && (
+              <TableRow>
+                <TableCell colSpan={2}></TableCell>
+
+                <TableCell colSpan={3} align="right">
+                  <Typography variant={"h6"}>
+                    Remaining Amount :{remainingAmount.toFixed(3)}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
           </TableFooter>
         </Table>
       </TableContainer>
     </Paper>
   );
-};
+});
 export default OverAllList;

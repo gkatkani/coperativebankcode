@@ -9,7 +9,10 @@ import {
 } from "../constant";
 
 export const checkForLoanType = (momentObj) => {
-  const month = moment(momentObj).month() + 1;
+  const month =
+    momentObj instanceof Date
+      ? momentObj.getMonth() + 1
+      : moment(momentObj).month() + 1;
   return KHARIF_MIN_LIMIT <= month && month <= KHARIF_MAX_LIMIT ? KHARIF : RABI;
 };
 export const validateNumbers = (s) => {
@@ -51,7 +54,34 @@ export const getPrevioustDate = (date) => {
   dateObj.setHours(0, 0, 0, 0);
   return dateObj;
 };
-
+export const sortByDate = (list) => {
+  return list.sort(function (a, b) {
+    return (
+      new Date(moment(a.loanDate)).getTime() -
+      new Date(moment(b.loanDate)).getTime()
+    );
+  });
+};
+export const filterDepositEnteries = (list) => {
+  return list
+    .filter((x) => x.isDeposit)
+    .map((x, ind) => {
+      x.id = ind;
+      x.loanDate = new Date(moment(x.loanDate));
+      x.loanDate.setHours(0, 0, 0, 0);
+      x.interestAmount = isAmountEmpty(x.interestAmount)
+        ? 0
+        : parseFloat(x.interestAmount);
+      x.loanAmount = isAmountEmpty(x.loanAmount) ? 0 : parseFloat(x.loanAmount);
+      x.settleInterestAmount = isAmountEmpty(x.interestAmount)
+        ? 0
+        : parseFloat(x.interestAmount);
+      x.settleLoanAmount = isAmountEmpty(x.loanAmount)
+        ? 0
+        : parseFloat(x.loanAmount);
+      return x;
+    });
+};
 export const getExceptionArray = (startDate, endDate, data) => {
   let tempArray = [];
   if (data.exceptions.length > 0) {
@@ -239,7 +269,6 @@ export const manageRecovery = (
   loanObj,
   depositList = []
 ) => {
-  let tempList = [];
   let localDepositRows = [...depositList];
   let localDayWiseInterestList = [];
   // day wise list for individual loan enteries
@@ -263,9 +292,10 @@ export const manageRecovery = (
             tempList.length > 0
               ? tempList[tempList.length - 1].endDate
               : item.startDate;
-          const localStartDateObj = getNextDate(
-            moment(lastLocalDate).format("YYYY-MM-DD")
-          );
+          const localStartDateObj =
+            tempList.length > 0
+              ? getNextDate(moment(lastLocalDate).format("YYYY-MM-DD"))
+              : lastLocalDate;
 
           tempList.push({
             ...itemCopy,
@@ -304,26 +334,91 @@ export const manageRecovery = (
     }
   });
   let interestSum = 0;
+  let localInternalPrincipalAmount = parseFloat(loanObj.loanAmount);
   let finalInterestList = [];
-  localDayWiseInterestList.forEach((item) => {
-    if (item.isDeposit) {
-      let p = item.loanPrincipalAmount;
-      let r = parseFloat(item.interestRate) + parseFloat(item.penaltyRate);
-      let t = parseFloat(item.dayDiff) / DAYS_IN_YEAR;
-      item.rowTotal = getSimpleInterest(p, r, t);
-      interestSum += item.rowTotal;
-      item.sumOfInterest = interestSum;
-    } else {
-      let p = loanObj?.loanAmount;
-      let r = parseFloat(item.interestRate) + parseFloat(item.penaltyRate);
-      let t = parseFloat(item.dayDiff) / DAYS_IN_YEAR;
-      item.rowTotal = getSimpleInterest(p, r, t);
-      interestSum += item.rowTotal;
-      item.sumOfInterest = interestSum;
-      finalInterestList.push(item);
+
+  if (localDayWiseInterestList.length > 0) {
+    for (let index = 0; index < localDayWiseInterestList.length; index++) {
+      const item = localDayWiseInterestList[index];
+      if (item.isDeposit) {
+        const depositRow = depositList[0];
+        if (depositRow.depositType === "interest") {
+          if (depositRow.settleInterestAmount >= interestSum) {
+            depositRow.settleInterestAmount =
+              depositRow.settleInterestAmount - interestSum;
+            interestSum = 0;
+
+            if (
+              depositRow.settleInterestAmount >= localInternalPrincipalAmount
+            ) {
+              depositRow.settleInterestAmount =
+                depositRow.settleInterestAmount - localInternalPrincipalAmount;
+              localInternalPrincipalAmount = 0;
+            } else {
+              localInternalPrincipalAmount =
+                localInternalPrincipalAmount - depositRow.settleInterestAmount;
+              depositRow.settleInterestAmount = 0;
+            }
+          } else {
+            interestSum = interestSum - depositRow.settleInterestAmount;
+            depositRow.settleInterestAmount = 0;
+          }
+        } else {
+          if (depositRow.settleLoanAmount >= localInternalPrincipalAmount) {
+            depositRow.settleLoanAmount =
+              depositRow.settleLoanAmount - localInternalPrincipalAmount;
+            localInternalPrincipalAmount = 0;
+            if (depositRow.settleLoanAmount >= interestSum) {
+              depositRow.settleLoanAmount =
+                depositRow.settleLoanAmount - interestSum;
+              interestSum = 0;
+            } else {
+              interestSum = interestSum - depositRow.settleLoanAmount;
+              depositRow.settleLoanAmount = 0;
+            }
+          } else {
+            localInternalPrincipalAmount =
+              localInternalPrincipalAmount - depositRow.settleLoanAmount;
+            depositRow.settleLoanAmount = 0;
+          }
+        }
+
+        if (
+          depositRow.settleLoanAmount > 0 ||
+          depositRow.settleInterestAmount > 0
+        ) {
+          depositList[0] = { ...depositRow, depositType: "interest" };
+        } else {
+          depositList.shift();
+        }
+        if (localInternalPrincipalAmount <= 0) {
+          localInternalPrincipalAmount = 0;
+        }
+
+        let p = localInternalPrincipalAmount;
+        let r = parseFloat(item.interestRate) + parseFloat(item.penaltyRate);
+        let t = parseFloat(item.dayDiff);
+        item.rowTotal = getSimpleInterest(p, r, t);
+        interestSum += item.rowTotal;
+        item.sumOfInterest = interestSum;
+        item.loanPrincipalAmount = localInternalPrincipalAmount;
+        finalInterestList.push(item);
+        if (localInternalPrincipalAmount <= 0) break;
+      } else {
+        let p = localInternalPrincipalAmount;
+        let r = parseFloat(item.interestRate) + parseFloat(item.penaltyRate);
+        let t = parseFloat(item.dayDiff);
+        item.rowTotal = getSimpleInterest(p, r, t);
+        interestSum += item.rowTotal;
+        item.sumOfInterest = interestSum;
+        item.loanPrincipalAmount = localInternalPrincipalAmount;
+        finalInterestList.push(item);
+      }
     }
-  });
+  }
+
   console.log("localDayWiseInterestList ====> ", localDayWiseInterestList);
+  console.log("finalInterestList ====> ", finalInterestList);
   // dayWiseInterestList.forEach((item) => {
 
   //   let p = parseFloat(loanObj?.loanAmount);
@@ -335,5 +430,5 @@ export const manageRecovery = (
   //   tempList.push(item);
   // });
 
-  return tempList;
+  return finalInterestList;
 };

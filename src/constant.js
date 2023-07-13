@@ -20,6 +20,7 @@ export const BASIC_TRANSACTION_ROW = {
   loanDate: null,
   loanSanctionDate: null,
   isDeposit: false,
+  depositType: "interest",
   loanType: "",
 };
 export const PERSONAL_INFORMATION = {
@@ -27,7 +28,8 @@ export const PERSONAL_INFORMATION = {
   accountNumber: "",
   personName: "",
 };
-export const TRANSACTION = [{ ...BASIC_TRANSACTION_ROW }];
+
+export const TRANSACTION = () => [{ ...BASIC_TRANSACTION_ROW }];
 export const MINIMUM_DATE = "2002-04-01";
 export const MAXIMUM_DATE = "2023-03-31";
 export const DAYS_IN_YEAR = 365;

@@ -8,7 +8,6 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import moment from "moment";
 import { styled } from "@mui/material/styles";
-import { TableFooter, Typography } from "@mui/material";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -48,12 +47,14 @@ const DetailedView = ({ reportList, totalInterest, amount }) => {
             <StyledTableRow>
               <StyledTableCell>S.no</StyledTableCell>
               <StyledTableCell align="left">Duration</StyledTableCell>
+              <StyledTableCell align="left">Amount</StyledTableCell>
               <StyledTableCell align="left">Start date</StyledTableCell>
               <StyledTableCell align="left">End date</StyledTableCell>
               <StyledTableCell align="left">Days</StyledTableCell>
               <StyledTableCell align="left">Rate</StyledTableCell>
               <StyledTableCell align="left">Penalty</StyledTableCell>
-              <StyledTableCell align="left">total</StyledTableCell>
+              <StyledTableCell align="left">row Interest</StyledTableCell>
+              <StyledTableCell align="left">Total Interest</StyledTableCell>
             </StyledTableRow>
           </TableHead>
           <TableBody>
@@ -67,6 +68,9 @@ const DetailedView = ({ reportList, totalInterest, amount }) => {
                 </StyledTableCell>
                 <StyledTableCell scope="row">
                   {row?.label ?? "-"}
+                </StyledTableCell>
+                <StyledTableCell scope="row">
+                  {row?.loanPrincipalAmount ?? "-"}
                 </StyledTableCell>
                 <StyledTableCell scope="row">
                   {moment(row.startDate).format("DD-MM-YYYY")}
@@ -86,45 +90,12 @@ const DetailedView = ({ reportList, totalInterest, amount }) => {
                 <StyledTableCell align="left">
                   {row?.rowTotal.toFixed(5) ?? 0}
                 </StyledTableCell>
+                <StyledTableCell align="left">
+                  {row?.sumOfInterest.toFixed(5) ?? 0}
+                </StyledTableCell>
               </StyledTableRow>
             ))}
           </TableBody>
-          {reportList.length > 0 && (
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={5}></TableCell>
-                <TableCell colSpan={3} align="right">
-                  <Typography variant={"h6"}>
-                    Total Interest : {totalInterest.toFixed(5)}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={5}></TableCell>
-                <TableCell colSpan={3} align="right">
-                  <Typography variant={"h6"}>
-                    Total Amount : {totalAmount.toFixed(5)}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            </TableFooter>
-          )}
-          {reportList.length === 0 && (
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={5}></TableCell>
-                <TableCell colSpan={3} align="right">
-                  <Typography variant={"h6"}>Total Interest : 0</Typography>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={5}></TableCell>
-                <TableCell colSpan={3} align="right">
-                  <Typography variant={"h6"}>Total Amount : 0</Typography>
-                </TableCell>
-              </TableRow>
-            </TableFooter>
-          )}
         </Table>
       </TableContainer>
     </Paper>
