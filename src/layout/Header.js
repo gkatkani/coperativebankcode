@@ -6,7 +6,7 @@ const Header = () => {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" color="inherit" component="div">
-            Co-operative bank [V 1.0.0 (Alpha)]
+            Jila Sahakari Kendriya Bank, Khandwa
           </Typography>
         </Toolbar>
       </AppBar>

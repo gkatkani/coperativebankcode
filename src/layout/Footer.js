@@ -5,7 +5,7 @@ const Footer = () => {
     <footer>
       <Toolbar>
         <Typography style={{ color: "#fff" }}>
-          Under developlment testing purpose only
+          Jila Sahakari Kendriya Bank COPYRIGHT &copy; 2023
         </Typography>
       </Toolbar>
     </footer>

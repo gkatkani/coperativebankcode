@@ -4,10 +4,9 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
 import moment from "moment";
 import { styled } from "@mui/material/styles";
-import { Grid, TableFooter, Typography } from "@mui/material";
+import { Box, Grid, TableFooter, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { addition, checkForLoanType } from "../helper/Index";
 
@@ -81,10 +80,8 @@ const OverAllList = React.forwardRef((props, ref) => {
   };
 
   return (
-    <Paper
-      sx={{ width: "100%", overflow: "hidden", padding: "15px" }}
-      ref={ref}
-    >
+    <Box sx={{ flexGrow: 1 }} ref={ref}>
+      <Typography variant="h4">Jila Sahakari Kendriya Bank, Khandwa</Typography>
       <br></br>
       <Grid container spacing={1} alignItems={"left"}>
         <Grid item xs={6}>
@@ -103,74 +100,78 @@ const OverAllList = React.forwardRef((props, ref) => {
           </Typography>
         </Grid>
       </Grid>
-
-      <TableContainer sx={{ maxHeight: 400 }}>
-        <Table
-          sx={{ minWidth: 550 }}
-          size="small"
-          aria-label="simple table"
-          stickyHeader={true}
-        >
-          <TableHead>
-            <StyledTableRow>
-              <StyledTableCell align="left">S.no</StyledTableCell>
-              <StyledTableCell align="left">Amount</StyledTableCell>
-              <StyledTableCell align="left">Type</StyledTableCell>
-              <StyledTableCell align="left">Date</StyledTableCell>
-            </StyledTableRow>
-          </TableHead>
-          <TableBody>
-            {list.map((row, index) => (
-              <StyledTableRow
-                key={index}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <StyledTableCell component="th" scope="row">
-                  {index + 1}
-                </StyledTableCell>
-                <StyledTableCell scope="row">
-                  {getRowAmount(row)}
-                </StyledTableCell>
-                <StyledTableCell scope="row">{getRowType(row)}</StyledTableCell>
-                <StyledTableCell scope="row">
-                  {moment(row?.loanDate).format("DD-MM-YYYY")}
-                </StyledTableCell>
+      <br></br>
+      <Grid container>
+        <TableContainer>
+          <Table
+            sx={{ minWidth: 550 }}
+            size="small"
+            aria-label="simple table"
+            stickyHeader={true}
+          >
+            <TableHead>
+              <StyledTableRow>
+                <StyledTableCell align="left">S.no</StyledTableCell>
+                <StyledTableCell align="left">Amount</StyledTableCell>
+                <StyledTableCell align="left">Type</StyledTableCell>
+                <StyledTableCell align="left">Date</StyledTableCell>
               </StyledTableRow>
-            ))}
-          </TableBody>
+            </TableHead>
+            <TableBody>
+              {list.map((row, index) => (
+                <StyledTableRow
+                  key={index}
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                >
+                  <StyledTableCell component="th" scope="row">
+                    {index + 1}
+                  </StyledTableCell>
+                  <StyledTableCell scope="row">
+                    {getRowAmount(row)}
+                  </StyledTableCell>
+                  <StyledTableCell scope="row">
+                    {getRowType(row)}
+                  </StyledTableCell>
+                  <StyledTableCell scope="row">
+                    {moment(row?.loanDate).format("DD-MM-YYYY")}
+                  </StyledTableCell>
+                </StyledTableRow>
+              ))}
+            </TableBody>
 
-          <TableFooter>
-            <TableRow>
-              <TableCell colSpan={2}></TableCell>
-              <TableCell colSpan={3} align="right">
-                <Typography variant={"h6"}>
-                  Grand Interest :{grandInterest.toFixed(3)}
-                </Typography>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell colSpan={2}></TableCell>
-              <TableCell colSpan={3} align="right">
-                <Typography variant={"h6"}>
-                  Grand Amount :{grandTotal.toFixed(3)}
-                </Typography>
-              </TableCell>
-            </TableRow>
-            {remainingAmount > 0 && (
+            <TableFooter>
               <TableRow>
                 <TableCell colSpan={2}></TableCell>
-
                 <TableCell colSpan={3} align="right">
                   <Typography variant={"h6"}>
-                    Remaining Amount :{remainingAmount.toFixed(3)}
+                    Grand Interest :{grandInterest.toFixed(3)}
                   </Typography>
                 </TableCell>
               </TableRow>
-            )}
-          </TableFooter>
-        </Table>
-      </TableContainer>
-    </Paper>
+              <TableRow>
+                <TableCell colSpan={2}></TableCell>
+                <TableCell colSpan={3} align="right">
+                  <Typography variant={"h6"}>
+                    Grand Amount :{grandTotal.toFixed(3)}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+              {remainingAmount > 0 && (
+                <TableRow>
+                  <TableCell colSpan={2}></TableCell>
+
+                  <TableCell colSpan={3} align="right">
+                    <Typography variant={"h6"}>
+                      Remaining Amount :{remainingAmount.toFixed(3)}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableFooter>
+          </Table>
+        </TableContainer>
+      </Grid>
+    </Box>
   );
 });
 export default OverAllList;

@@ -4,7 +4,6 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useRef, useState } from "react";
 import {
-  addition,
   calculateInterest,
   checkForLoanType,
   filterDepositEnteries,
@@ -17,6 +16,12 @@ import moment from "moment";
 import OverAllList from "../component/OverAllList";
 import { BASIC_TRANSACTION_ROW, INITIALIZE, TRANSACTION } from "../constant";
 import { useReactToPrint } from "react-to-print";
+import CalculateTwoToneIcon from "@mui/icons-material/CalculateTwoTone";
+import AddCircleOutlineTwoToneIcon from "@mui/icons-material/AddCircleOutlineTwoTone";
+import CreditScoreTwoToneIcon from "@mui/icons-material/CreditScoreTwoTone";
+import AccountBalanceWalletTwoToneIcon from "@mui/icons-material/AccountBalanceWalletTwoTone";
+import PrintTwoToneIcon from "@mui/icons-material/PrintTwoTone";
+import RestartAltTwoToneIcon from "@mui/icons-material/RestartAltTwoTone";
 const Content = () => {
   const [reportList, setReportList] = useState([]);
   const [disabledCalculate, setDisabledCalculate] = useState(false);
@@ -24,50 +29,12 @@ const Content = () => {
   const [intialObj, setInitialObj] = useState({ ...INITIALIZE });
   const [transactionList, setTransactionList] = useState(TRANSACTION);
   const [sortedTransactionList, setSortedTransactionList] = useState([]);
-  const [overAllSummary, setOverAllSummary] = useState([]);
   const [remainingAmount, setRemainingAmount] = useState(0);
   const componentRef = useRef(null);
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
   });
-  const generateReport = () => {
-    let defaultObj = {
-      amount: intialObj?.loanAmount,
-      loanSanctionDate: intialObj?.loanSanctionDate,
-      loanType: null,
-    };
 
-    const loanType = checkForLoanType(defaultObj.loanSanctionDate);
-
-    defaultObj = {
-      ...defaultObj,
-      loanType,
-    };
-
-    const result = calculateInterest(defaultObj);
-    const rowTotalArray = [];
-    result.map((item) => {
-      let p = parseFloat(intialObj?.loanAmount);
-      let r = parseFloat(item.interestRate) + parseFloat(item.penaltyRate);
-      let t = parseFloat(item.dayDiff) / 365;
-      item.rowTotal = (p * r * t) / 100;
-      rowTotalArray.push(item.rowTotal);
-      return item;
-    });
-    const interest = rowTotalArray.reduce((a, b) => a + b, 0);
-    setOverAllSummary([
-      ...overAllSummary,
-      {
-        ...intialObj,
-        interestSum: interest,
-        interestWithPrincipal: addition(interest, intialObj?.loanAmount),
-        loanType: checkForLoanType(defaultObj.loanSanctionDate),
-      },
-    ]);
-
-    setTotalInterest(interest);
-    setReportList(result);
-  };
   const calculate = (transactionListCopy) => {
     //sorting alist by its ascending orderconsole.log("transactionListCopy ====> ", transactionListCopy);
     const sortedList = sortByDate(transactionListCopy);
@@ -301,9 +268,8 @@ const Content = () => {
                   setReportList([]);
                   calculate([...transactionList]);
                   setDisabledCalculate(true);
-                  // setEnableCalculate(false);
-                  // generateReport();
                 }}
+                startIcon={<CalculateTwoToneIcon />}
               >
                 Calculate
               </Button>
@@ -318,6 +284,7 @@ const Content = () => {
                     { ...BASIC_TRANSACTION_ROW },
                   ]);
                 }}
+                startIcon={<AddCircleOutlineTwoToneIcon />}
               >
                 Add Loan
               </Button>
@@ -337,6 +304,7 @@ const Content = () => {
                     },
                   ]);
                 }}
+                startIcon={<AccountBalanceWalletTwoToneIcon />}
               >
                 Deposit in Principal
               </Button>
@@ -356,12 +324,17 @@ const Content = () => {
                     },
                   ]);
                 }}
+                startIcon={<CreditScoreTwoToneIcon />}
               >
                 Deposit in Interest
               </Button>
             </Grid>
             <Grid item>
-              <Button variant="contained" onClick={handlePrint}>
+              <Button
+                variant="contained"
+                onClick={handlePrint}
+                startIcon={<PrintTwoToneIcon />}
+              >
                 Print
               </Button>
             </Grid>
@@ -376,9 +349,10 @@ const Content = () => {
                   setSortedTransactionList([]);
                   setTransactionList(TRANSACTION);
                   setTotalInterest(0);
-                  setOverAllSummary([]);
                   setRemainingAmount(0);
+                  window.location.reload();
                 }}
+                startIcon={<RestartAltTwoToneIcon />}
               >
                 Clear All
               </Button>
@@ -399,14 +373,18 @@ const Content = () => {
           </Grid>
         </Grid>
         <Grid container>
-          <Grid item md={10}>
-            <Typography variant="h4">Current Summary</Typography>
-            <DetailedView
-              reportList={reportList}
-              totalInterest={totalInterest}
-              amount={intialObj?.loanAmount === "" ? 0 : intialObj?.loanAmount}
-            />
-          </Grid>
+          {reportList.length > 0 && (
+            <Grid item md={10}>
+              <Typography variant="h4">Current Summary</Typography>
+              <DetailedView
+                reportList={reportList}
+                totalInterest={totalInterest}
+                amount={
+                  intialObj?.loanAmount === "" ? 0 : intialObj?.loanAmount
+                }
+              />
+            </Grid>
+          )}
         </Grid>
         {/* table part */}
       </Grid>

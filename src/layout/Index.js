@@ -9,7 +9,9 @@ const DefaultLayout = () => {
         <Header />
       </div>
       <br />
-      <Content />
+      <div style={{ flexGrow: 1, margin: "10px" }}>
+        <Content />
+      </div>
       <div className="footer">
         <Footer />
       </div>
