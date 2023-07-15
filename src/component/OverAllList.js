@@ -69,9 +69,9 @@ const OverAllList = React.forwardRef((props, ref) => {
 
     if (rowObj.isDeposit) {
       if (rowObj.depositType === "interest") {
-        temp = "Deposit in Principal";
-      } else {
         temp = "Deposit in Interest";
+      } else {
+        temp = "Deposit in Principal";
       }
     } else {
       temp = checkForLoanType(moment(rowObj?.loanDate));

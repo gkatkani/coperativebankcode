@@ -1,4 +1,13 @@
-import { Box, Button, Grid, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  Button,
+  Grid,
+  Snackbar,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -14,7 +23,13 @@ import {
 import DetailedView from "../pages/DetailedView";
 import moment from "moment";
 import OverAllList from "../component/OverAllList";
-import { BASIC_TRANSACTION_ROW, INITIALIZE, TRANSACTION } from "../constant";
+import {
+  BASIC_TRANSACTION_ROW,
+  INITIALIZE,
+  MAXIMUM_DATE,
+  MINIMUM_DATE,
+  TRANSACTION,
+} from "../constant";
 import { useReactToPrint } from "react-to-print";
 import CalculateTwoToneIcon from "@mui/icons-material/CalculateTwoTone";
 import AddCircleOutlineTwoToneIcon from "@mui/icons-material/AddCircleOutlineTwoTone";
@@ -25,6 +40,7 @@ import RestartAltTwoToneIcon from "@mui/icons-material/RestartAltTwoTone";
 const Content = () => {
   const [reportList, setReportList] = useState([]);
   const [disabledCalculate, setDisabledCalculate] = useState(false);
+  const [showError, setShowError] = useState(false);
   const [totalInterest, setTotalInterest] = useState(0);
   const [intialObj, setInitialObj] = useState({ ...INITIALIZE });
   const [transactionList, setTransactionList] = useState(TRANSACTION);
@@ -81,6 +97,24 @@ const Content = () => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
+      {showError && (
+        <Snackbar
+          open={showError}
+          vertical={"top"}
+          horizontal={"center"}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          autoHideDuration={6000}
+          onClose={() => setShowError(false)}
+        >
+          <Alert
+            onClose={() => setShowError(false)}
+            severity="error"
+            sx={{ width: "100%" }}
+          >
+            Error in input — <strong>Invalid Date Or Amount!</strong>
+          </Alert>
+        </Snackbar>
+      )}
       <Grid container>
         {/* form part */}
         <Grid item xs={6}>
@@ -204,8 +238,8 @@ const Content = () => {
                           setTransactionList([...tempTransactionList]);
                         }
                       }}
-                      minDate={moment(new Date("2002-04-01"))}
-                      maxDate={moment(new Date("2023-03-31"))}
+                      minDate={moment(new Date(MINIMUM_DATE))}
+                      maxDate={moment(new Date(MAXIMUM_DATE))}
                       slotProps={{ textField: { size: "small" } }}
                     />
                   </LocalizationProvider>
@@ -265,9 +299,25 @@ const Content = () => {
                 disabled={disabledCalculate}
                 variant="contained"
                 onClick={() => {
-                  setReportList([]);
-                  calculate([...transactionList]);
-                  setDisabledCalculate(true);
+                  const list = transactionList.filter((x) => {
+                    return (
+                      x.loanDate === null ||
+                      new Date(moment(x.loanDate)).getTime() <
+                        new Date(MINIMUM_DATE).getTime() ||
+                      new Date(moment(x.loanDate)).getTime() >=
+                        new Date(MAXIMUM_DATE).getTime() ||
+                      x.loanAmount === "" ||
+                      x.loanAmount === null
+                    );
+                  });
+                  if (list.length === 0) {
+                    setShowError(false);
+                    setReportList([]);
+                    calculate([...transactionList]);
+                    setDisabledCalculate(true);
+                  } else {
+                    setShowError(true);
+                  }
                 }}
                 startIcon={<CalculateTwoToneIcon />}
               >
