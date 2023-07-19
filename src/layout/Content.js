@@ -36,6 +36,7 @@ import CreditScoreTwoToneIcon from "@mui/icons-material/CreditScoreTwoTone";
 import AccountBalanceWalletTwoToneIcon from "@mui/icons-material/AccountBalanceWalletTwoTone";
 import PrintTwoToneIcon from "@mui/icons-material/PrintTwoTone";
 import RestartAltTwoToneIcon from "@mui/icons-material/RestartAltTwoTone";
+import PrintPreview from "../pages/PrintPreview";
 const Content = () => {
   const [reportList, setReportList] = useState([]);
   const [disabledCalculate, setDisabledCalculate] = useState(false);
@@ -414,7 +415,6 @@ const Content = () => {
         <Grid item xs={6}>
           <Grid container>
             <OverAllList
-              ref={componentRef}
               list={sortedTransactionList}
               intialObj={intialObj}
               remainingAmount={remainingAmount}
@@ -437,6 +437,14 @@ const Content = () => {
         </Grid>
         {/* table part */}
       </Grid>
+      <div style={{ display: "none" }}>
+        <PrintPreview
+          ref={componentRef}
+          list={sortedTransactionList}
+          intialObj={intialObj}
+          remainingAmount={remainingAmount}
+        />
+      </div>
     </Box>
   );
 };

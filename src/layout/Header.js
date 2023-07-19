@@ -46,11 +46,25 @@ const Header = () => {
             aria-describedby="alert-dialog-description"
           >
             <DialogTitle id="alert-dialog-title">
-              <Typography variant="h5">Any help required ? </Typography>
+              <Typography variant="h5">
+                Any help or support required ?{" "}
+              </Typography>
             </DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
-                Please connect me on email:
+                Please reach us on email :
+                <ul>
+                  <li>
+                    {" "}
+                    <a href="mailto:master.rohitjoshi@gmail.com">
+                      master.rohitjoshi@gmail.com
+                    </a>
+                  </li>
+                  <li>
+                    {" "}
+                    <a href="mailto:gkatkani@gmail.com">gkatkani@gmail.com</a>
+                  </li>
+                </ul>
               </DialogContentText>
             </DialogContent>
             <DialogActions>

@@ -28,10 +28,10 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     border: 0,
   },
 }));
-const OverAllList = React.forwardRef((props, ref) => {
-  const list = props?.list;
-  const intialObj = props?.intialObj;
-  const remainingAmount = props?.remainingAmount;
+const OverAllList = ({ list, intialObj, remainingAmount }) => {
+  // const list = props?.list;
+  // const intialObj = props?.intialObj;
+  // const remainingAmount = props?.remainingAmount;
 
   const [grandTotal, setGrandTotal] = useState(0);
   const [grandInterest, setGrandInterest] = useState(0);
@@ -80,8 +80,7 @@ const OverAllList = React.forwardRef((props, ref) => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }} ref={ref}>
-      <Typography variant="h4">Jila Sahakari Kendriya Bank, Khandwa</Typography>
+    <Box sx={{ flexGrow: 1 }}>
       <br></br>
       <Grid container spacing={1} alignItems={"left"}>
         <Grid item xs={6}>
@@ -173,5 +172,5 @@ const OverAllList = React.forwardRef((props, ref) => {
       </Grid>
     </Box>
   );
-});
+};
 export default OverAllList;
