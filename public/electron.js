@@ -9,9 +9,16 @@ function createWindow() {
       protocol: "file:",
       slashes: true,
     });
+  // We cannot require the screen module until the app is ready.
+  const { screen } = require("electron");
+
+  // Create a window that fills the screen's available work area.
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+
   const win = new BrowserWindow({
-    width: 1024,
-    height: 768,
+    width,
+    height,
     webPreferences: {
       nodeIntegration: true,
     },
