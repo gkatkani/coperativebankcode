@@ -368,14 +368,14 @@ export const manageRecovery = (
             depositRow.settleLoanAmount =
               depositRow.settleLoanAmount - localInternalPrincipalAmount;
             localInternalPrincipalAmount = 0;
-            if (depositRow.settleLoanAmount >= interestSum) {
-              depositRow.settleLoanAmount =
-                depositRow.settleLoanAmount - interestSum;
-              interestSum = 0;
-            } else {
-              interestSum = interestSum - depositRow.settleLoanAmount;
-              depositRow.settleLoanAmount = 0;
-            }
+            // if (depositRow.settleLoanAmount >= interestSum) {
+            //   depositRow.settleLoanAmount =
+            //     depositRow.settleLoanAmount - interestSum;
+            //   interestSum = 0;
+            // } else {
+            //   interestSum = interestSum - depositRow.settleLoanAmount;
+            //   depositRow.settleLoanAmount = 0;
+            // }
           } else {
             localInternalPrincipalAmount =
               localInternalPrincipalAmount - depositRow.settleLoanAmount;

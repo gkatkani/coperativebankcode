@@ -302,12 +302,12 @@ const Content = () => {
                   const list = transactionList.filter((x) => {
                     return (
                       x.loanDate === null ||
-                      new Date(moment(x.loanDate)).getTime() <
+                      new Date(moment(x.loanDate)).getTime() <=
                         new Date(MINIMUM_DATE).getTime() ||
                       new Date(moment(x.loanDate)).getTime() >=
                         new Date(MAXIMUM_DATE).getTime() ||
-                      x.loanAmount === "" ||
-                      x.loanAmount === null
+                      (x.loanAmount === "" && !x.isDeposit) ||
+                      (x.loanAmount === null && !x.isDeposit)
                     );
                   });
                   if (list.length === 0) {
