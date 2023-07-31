@@ -119,7 +119,8 @@ const OverAllList = ({ list, intialObj, remainingAmount }) => {
             <TableBody>
               {list.map((row, index) => (
                 <StyledTableRow
-                  key={index}
+                  key={`overall-list-${index}`}
+                  id={`overall-list-${index}`}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
                   <StyledTableCell component="th" scope="row">
@@ -139,7 +140,7 @@ const OverAllList = ({ list, intialObj, remainingAmount }) => {
             </TableBody>
 
             <TableFooter>
-              <TableRow>
+              <TableRow id="grandInterest">
                 <TableCell colSpan={2}></TableCell>
                 <TableCell colSpan={3} align="right">
                   <Typography variant={"h6"}>
@@ -147,7 +148,7 @@ const OverAllList = ({ list, intialObj, remainingAmount }) => {
                   </Typography>
                 </TableCell>
               </TableRow>
-              <TableRow>
+              <TableRow id="grandAmount">
                 <TableCell colSpan={2}></TableCell>
                 <TableCell colSpan={3} align="right">
                   <Typography variant={"h6"}>

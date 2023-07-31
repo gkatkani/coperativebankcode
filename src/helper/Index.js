@@ -3,9 +3,11 @@ import {
   DAYS_IN_YEAR,
   INTEREST_ARRAY,
   KHARIF,
+  KHARIF_KEY,
   KHARIF_MAX_LIMIT,
   KHARIF_MIN_LIMIT,
   RABI,
+  RABI_KEY,
 } from "../constant";
 
 export const checkForLoanType = (momentObj) => {
@@ -62,6 +64,7 @@ export const sortByDate = (list) => {
     );
   });
 };
+
 export const filterDepositEnteries = (list) => {
   return list
     .filter((x) => x.isDeposit)
@@ -121,7 +124,8 @@ export const calculateInterest = (obj) => {
     year = year - 1;
   }
 
-  const dateKey = obj.loanType === KHARIF ? "kharifDate" : "RabiDate";
+  const dateKey = obj.loanType === KHARIF ? KHARIF_KEY : RABI_KEY;
+
   const interestArrayForApply = INTEREST_ARRAY.find(
     (item) => item.year === year
   );
@@ -419,16 +423,6 @@ export const manageRecovery = (
 
   console.log("localDayWiseInterestList ====> ", localDayWiseInterestList);
   console.log("finalInterestList ====> ", finalInterestList);
-  // dayWiseInterestList.forEach((item) => {
-
-  //   let p = parseFloat(loanObj?.loanAmount);
-  //   let r = parseFloat(item.interestRate) + parseFloat(item.penaltyRate);
-  //   let t = parseFloat(item.dayDiff) / DAYS_IN_YEAR;
-  //   item.rowTotal = getSimpleInterest(p, r, t);
-  //   interestSum += item.rowTotal;
-  //   item.sumOfInterest = interestSum;
-  //   tempList.push(item);
-  // });
 
   return finalInterestList;
 };

@@ -37,6 +37,7 @@ import AccountBalanceWalletTwoToneIcon from "@mui/icons-material/AccountBalanceW
 import PrintTwoToneIcon from "@mui/icons-material/PrintTwoTone";
 import RestartAltTwoToneIcon from "@mui/icons-material/RestartAltTwoTone";
 import PrintPreview from "../pages/PrintPreview";
+import { validateForAmountAndDate } from "../services/validateService";
 const Content = () => {
   const [reportList, setReportList] = useState([]);
   const [disabledCalculate, setDisabledCalculate] = useState(false);
@@ -52,46 +53,61 @@ const Content = () => {
   });
 
   const calculate = (transactionListCopy) => {
-    //sorting alist by its ascending orderconsole.log("transactionListCopy ====> ", transactionListCopy);
-    const sortedList = sortByDate(transactionListCopy);
-    const depositList = filterDepositEnteries(transactionListCopy);
+    const sortedLoanList = sortByDate(transactionListCopy).filter(
+      (x) => x.isDeposit === false
+    );
 
-    sortedList.map((elem) => {
+    const sortedDepositList = filterDepositEnteries(
+      sortByDate(transactionListCopy)
+    );
+
+    sortedLoanList.map((elem) => {
       elem.summaryReport = [];
-      if (!elem?.isDeposit) {
-        let defaultObj = {
-          amount: parseFloat(elem?.loanAmount),
-          loanSanctionDate: elem?.loanDate,
-          loanType: null,
-        };
 
-        const loanType = checkForLoanType(defaultObj.loanSanctionDate);
+      let defaultObj = {
+        amount: parseFloat(elem?.loanAmount),
+        loanSanctionDate: elem?.loanDate,
+        loanType: null,
+      };
 
-        defaultObj = {
-          ...defaultObj,
-          loanType,
-        };
-        // calculate  the interest for a given time
-        const result = calculateInterest(defaultObj);
-        // adjust recovery and interest by modifying time interval
-        const list = manageRecovery([...result], { ...elem }, [...depositList]);
-        elem.summaryReport = list;
-        setReportList([...reportList, ...list]);
-        //const interest = rowTotalArray.reduce((a, b) => a + b, 0);
+      const loanType = checkForLoanType(defaultObj.loanSanctionDate);
 
-        // console.log("result ======> ", list);
-      }
+      defaultObj = {
+        ...defaultObj,
+        loanType,
+      };
+      // calculate  the interest for a given time
+      const result = calculateInterest(defaultObj);
+      // adjust recovery and interest by modifying time interval
+      const list = manageRecovery([...result], { ...elem }, [
+        ...sortedDepositList,
+      ]);
+      elem.summaryReport = list;
+      setReportList([...reportList, ...list]);
       return elem;
     });
-    setSortedTransactionList([...sortedList]);
 
-    if (depositList.length > 0) {
+    setSortedTransactionList([...sortedLoanList]);
+    console.log("sortedDepositList ==========>", sortedDepositList);
+    if (sortedDepositList.length > 0) {
       let amount = 0;
-      depositList.forEach((element) => {
+      sortedDepositList.forEach((element) => {
         amount =
           amount + element?.settleLoanAmount + element?.settleInterestAmount;
       });
       setRemainingAmount(amount);
+    }
+  };
+
+  const calculateHandler = () => {
+    const nonValidateRows = validateForAmountAndDate(transactionList);
+    if (nonValidateRows.length === 0) {
+      setShowError(false);
+      setReportList([]);
+      calculate([...transactionList]);
+      setDisabledCalculate(true);
+    } else {
+      setShowError(true);
     }
   };
 
@@ -117,7 +133,7 @@ const Content = () => {
       )}
       <Grid container>
         {/* form part */}
-        <Grid item xs={6}>
+        <Grid item xs={12} md={6}>
           {/* basic info */}
           <Grid container spacing={1} className="mr_bm_20">
             <Grid item>
@@ -299,25 +315,7 @@ const Content = () => {
                 disabled={disabledCalculate}
                 variant="contained"
                 onClick={() => {
-                  const list = transactionList.filter((x) => {
-                    return (
-                      x.loanDate === null ||
-                      new Date(moment(x.loanDate)).getTime() <=
-                        new Date(MINIMUM_DATE).getTime() ||
-                      new Date(moment(x.loanDate)).getTime() >=
-                        new Date(MAXIMUM_DATE).getTime() ||
-                      (x.loanAmount === "" && !x.isDeposit) ||
-                      (x.loanAmount === null && !x.isDeposit)
-                    );
-                  });
-                  if (list.length === 0) {
-                    setShowError(false);
-                    setReportList([]);
-                    calculate([...transactionList]);
-                    setDisabledCalculate(true);
-                  } else {
-                    setShowError(true);
-                  }
+                  calculateHandler();
                 }}
                 startIcon={<CalculateTwoToneIcon />}
               >
@@ -411,8 +409,8 @@ const Content = () => {
           {/* action buttons */}
         </Grid>
         {/* form part */}
-        {/* table part */}
-        <Grid item xs={6}>
+        {/* overall table part */}
+        <Grid item xs={12} md={6}>
           <Grid container>
             <OverAllList
               list={sortedTransactionList}
@@ -421,7 +419,9 @@ const Content = () => {
             />
           </Grid>
         </Grid>
-        <Grid container>
+        {/*overall table part */}
+        {/*summary table part */}
+        <Grid item xs={12} md={12}>
           {reportList.length > 0 && (
             <Grid item md={10}>
               <Typography variant="h4">Current Summary</Typography>
@@ -435,7 +435,7 @@ const Content = () => {
             </Grid>
           )}
         </Grid>
-        {/* table part */}
+        {/*summary table part */}
       </Grid>
       <div style={{ display: "none" }}>
         <PrintPreview
