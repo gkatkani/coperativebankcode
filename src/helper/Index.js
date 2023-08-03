@@ -65,13 +65,19 @@ export const sortByDate = (list) => {
   });
 };
 
-export const filterDepositEnteries = (list) => {
+export const filterDepositEnteries = (list, firstLoanObj = {}) => {
+  const minLoanSanctionDate = new Date(moment(firstLoanObj?.loanDate));
+  minLoanSanctionDate.setHours(0, 0, 0, 0);
   return list
     .filter((x) => x.isDeposit)
     .map((x, ind) => {
       x.id = ind;
       x.loanDate = new Date(moment(x.loanDate));
       x.loanDate.setHours(0, 0, 0, 0);
+      x.loanDate =
+        x.loanDate.getTime() < minLoanSanctionDate.getTime()
+          ? minLoanSanctionDate
+          : x.loanDate;
       x.interestAmount = isAmountEmpty(x.interestAmount)
         ? 0
         : parseFloat(x.interestAmount);

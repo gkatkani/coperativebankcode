@@ -2,6 +2,7 @@ import {
   Alert,
   Box,
   Button,
+  Fab,
   Grid,
   Snackbar,
   TextField,
@@ -38,6 +39,7 @@ import PrintTwoToneIcon from "@mui/icons-material/PrintTwoTone";
 import RestartAltTwoToneIcon from "@mui/icons-material/RestartAltTwoTone";
 import PrintPreview from "../pages/PrintPreview";
 import { validateForAmountAndDate } from "../services/validateService";
+import ClearIcon from "@mui/icons-material/Clear";
 const Content = () => {
   const [reportList, setReportList] = useState([]);
   const [disabledCalculate, setDisabledCalculate] = useState(false);
@@ -58,7 +60,8 @@ const Content = () => {
     );
 
     const sortedDepositList = filterDepositEnteries(
-      sortByDate(transactionListCopy)
+      sortByDate(transactionListCopy),
+      sortedLoanList[0]
     );
 
     sortedLoanList.map((elem) => {
@@ -260,6 +263,20 @@ const Content = () => {
                     />
                   </LocalizationProvider>
                 </Grid>
+                <Grid item>
+                  <Fab
+                    color="error"
+                    size="small"
+                    aria-label="remove"
+                    onClick={() => {
+                      let tempTransactionList = [...transactionList];
+                      tempTransactionList.splice(index, 1);
+                      setTransactionList([...tempTransactionList]);
+                    }}
+                  >
+                    <ClearIcon />
+                  </Fab>
+                </Grid>
               </Grid>
             ) : (
               <Grid container spacing={1} className="mr_bm_20">
@@ -303,6 +320,22 @@ const Content = () => {
                     />
                   </LocalizationProvider>
                 </Grid>
+                {index > 0 && (
+                  <Grid item>
+                    <Fab
+                      color="error"
+                      size="small"
+                      aria-label="remove"
+                      onClick={() => {
+                        let tempTransactionList = [...transactionList];
+                        tempTransactionList.splice(index, 1);
+                        setTransactionList([...tempTransactionList]);
+                      }}
+                    >
+                      <ClearIcon />
+                    </Fab>
+                  </Grid>
+                )}
               </Grid>
             )
           )}
